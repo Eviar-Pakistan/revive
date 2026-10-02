@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/temp/*
+!media/temp/.gitkeep
+*.onnx
+*.pkl
+*.pth
+*.h5
+*.pb
+.venv/
+venv/
+env/

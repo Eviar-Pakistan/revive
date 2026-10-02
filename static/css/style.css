@@ -1,0 +1,882 @@
+/* Revive microsite — consistent full-bleed UI across home / camera / analysis / CTA */
+
+:root {
+  --revive-navy: #0a3d6e;
+  --revive-blue: #00adef;
+  --revive-lime: #8cc63f;
+  --revive-sky: #6ec8ea;
+  --revive-white: #ffffff;
+  --revive-ink: #062a4a;
+  --revive-shadow: 0 10px 28px rgba(6, 42, 74, 0.28);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --page-pad: clamp(0.45rem, 1.6vw, 0.85rem);
+  --font: "Montserrat", "Segoe UI", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+  font-family: var(--font);
+  background: var(--revive-sky);
+  color: var(--revive-ink);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#revive-root {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: var(--revive-sky);
+}
+
+.page {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+}
+
+.page.active {
+  display: flex;
+}
+
+.page[hidden] {
+  display: none !important;
+}
+
+/* ---------- Full-bleed art (no letterboxing) ---------- */
+
+.page-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--revive-sky);
+  pointer-events: none;
+}
+
+.page-bg picture,
+.page-bg-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.page-bg-img {
+  object-fit: cover;
+  object-position: center center;
+}
+
+/*
+  Home + Revive posters have critical text — default contain for tablet/laptop
+  so landscape posters are never side-cropped.
+*/
+.page-home .page-bg-img,
+.page-revive .page-bg-img {
+  object-fit: contain;
+  object-position: center center;
+}
+
+/* Camera / analysis ice backgrounds are decorative — cover is fine */
+.page-camera .page-bg-img,
+.page-analysis .page-bg-img {
+  object-fit: cover;
+  object-position: center center;
+}
+
+/*
+  Mobile only — new home art is 853×1844 (~tall phone).
+  Cover fills the screen; CTA sits in the ice bed at the bottom.
+*/
+@media (max-width: 767px) {
+  .page-home .page-bg-img {
+    object-fit: cover;
+    object-position: center 42%;
+  }
+
+  .page-home .home-footer {
+    justify-content: center;
+    padding: 0 1.25rem calc(1.65rem + var(--safe-bottom));
+  }
+
+  .page-home .btn-take-selfie {
+    min-width: min(78vw, 300px);
+    width: min(78vw, 300px);
+    padding: 0.92rem 1.4rem;
+    font-size: clamp(0.95rem, 4.1vw, 1.05rem);
+    letter-spacing: 0.02em;
+  }
+
+  .page-revive .page-bg-img {
+    object-fit: cover;
+    object-position: center 40%;
+  }
+
+  .page-revive .revive-footer {
+    justify-content: center;
+    padding: 0 1.25rem calc(1.65rem + var(--safe-bottom));
+  }
+
+  .page-revive .btn-start-over {
+    min-width: min(78vw, 300px);
+    width: min(78vw, 300px);
+  }
+}
+
+/* ---------- Shared controls ---------- */
+
+.btn-primary {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--revive-white);
+  background: linear-gradient(180deg, #9ad645 0%, var(--revive-lime) 45%, #6fa82a 100%);
+  box-shadow: var(--revive-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 0.95rem 2rem;
+  font-size: clamp(0.95rem, 3.4vw, 1.15rem);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.btn-text {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--revive-navy);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+}
+
+.btn-chip {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.78rem;
+  color: var(--revive-navy);
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.btn-icon {
+  appearance: none;
+  border: 0;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--revive-navy);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- HOME ---------- */
+
+.home-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  padding: 0 1.25rem calc(1.25rem + var(--safe-bottom));
+}
+
+.btn-take-selfie {
+  min-width: min(86vw, 340px);
+  animation: pulseCta 2.4s ease-in-out infinite;
+}
+
+@keyframes pulseCta {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: var(--revive-shadow);
+  }
+  50% {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(6, 42, 74, 0.34);
+  }
+}
+
+@media (min-width: 768px) and (orientation: landscape) {
+  .home-footer {
+    justify-content: flex-start;
+    padding-left: clamp(2rem, 7vw, 5.5rem);
+    padding-bottom: calc(1.75rem + var(--safe-bottom));
+  }
+
+  .btn-take-selfie {
+    min-width: 280px;
+  }
+}
+
+/*
+  Tablet portrait — tablet_view_home_screen.png is 1024×1536.
+  Cover fills the frame; CTA sits in the ice bed under the bottles/fruit.
+*/
+@media (min-width: 768px) and (max-width: 1279px) and (orientation: portrait) {
+  .page-home .page-bg-img {
+    object-fit: cover;
+    object-position: center 38%;
+  }
+
+  .page-home .home-footer {
+    justify-content: center;
+    padding: 0 2rem calc(1.75rem + var(--safe-bottom));
+  }
+
+  .page-home .btn-take-selfie {
+    min-width: min(52vw, 320px);
+    width: min(52vw, 320px);
+    padding: 1rem 2rem;
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+  }
+
+  .page-revive .page-bg-img {
+    object-fit: cover;
+    object-position: center 38%;
+  }
+
+  .page-revive .revive-footer {
+    justify-content: center;
+    padding: 0 2rem calc(1.75rem + var(--safe-bottom));
+  }
+
+  .page-revive .btn-start-over {
+    min-width: min(52vw, 320px);
+    width: min(52vw, 320px);
+  }
+}
+
+/*
+  Tablet landscape — tablet_view_home_screen2.png is 1536×1024.
+  Keep left copy visible; CTA in the ice under the feature icons.
+*/
+@media (min-width: 768px) and (max-width: 1279px) and (orientation: landscape) {
+  .page-home .page-bg-img {
+    object-fit: cover;
+    object-position: left center;
+  }
+
+  .page-home .home-footer {
+    justify-content: flex-start;
+    padding-left: clamp(1.75rem, 5.5vw, 3.75rem);
+    padding-right: 1rem;
+    padding-bottom: calc(1.35rem + var(--safe-bottom));
+  }
+
+  .page-home .btn-take-selfie {
+    min-width: 250px;
+    width: auto;
+    padding: 0.88rem 1.85rem;
+    font-size: clamp(0.95rem, 1.7vw, 1.08rem);
+  }
+
+  .page-revive .page-bg-img {
+    object-fit: cover;
+    object-position: left center;
+  }
+
+  .page-revive .revive-footer {
+    justify-content: flex-start;
+    padding-left: clamp(1.75rem, 5.5vw, 3.75rem);
+    padding-right: 1rem;
+    padding-bottom: calc(1.35rem + var(--safe-bottom));
+  }
+
+  .page-revive .btn-start-over {
+    min-width: 250px;
+    width: auto;
+  }
+}
+
+/* ---------- CAMERA ---------- */
+
+.camera-shell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding:
+    calc(var(--page-pad) + var(--safe-top))
+    var(--page-pad)
+    calc(var(--page-pad) + var(--safe-bottom));
+  gap: 0.45rem;
+}
+
+.camera-top {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.15rem 0.1rem;
+}
+
+.camera-title {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--revive-navy);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 0.95rem;
+}
+
+.camera-stage {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  width: 100%;
+}
+
+.camera-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  background: #021528;
+  box-shadow: 0 16px 36px rgba(2, 21, 40, 0.32);
+  border: 3px solid rgba(255, 255, 255, 0.82);
+  display: flex;
+  flex-direction: column;
+}
+
+.ymk-module {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  font-family: var(--font);
+}
+
+.ymk-module,
+.ymk-module div,
+.ymk-module span,
+.ymk-module p,
+.ymk-module button,
+.ymk-module label {
+  font-family: var(--font) !important;
+}
+
+.ymk-module img[src*="i-camera-flip"],
+.ymk-module [style*="i-camera-flip"],
+.ymk-module img[src*="camera-flip"],
+.ymk-module [style*="camera-flip"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.ymk-module iframe,
+.ymk-module canvas,
+.ymk-module video,
+.ymk-module > div {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.ymk-module video {
+  object-fit: cover;
+}
+
+.camera-boot-ui,
+.camera-analyze-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(4, 30, 54, 0.72);
+  color: #fff;
+  font-weight: 700;
+  z-index: 6;
+}
+
+.camera-boot-ui[hidden],
+.camera-analyze-ui[hidden] {
+  display: none !important;
+}
+
+.camera-stage.is-booting .ymk-module {
+  opacity: 0;
+}
+
+.camera-boot-spinner {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--revive-lime);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.camera-analyze-beam {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--revive-lime), transparent);
+  animation: scanBeam 1.6s ease-in-out infinite;
+  box-shadow: 0 0 16px var(--revive-lime);
+}
+
+@keyframes scanBeam {
+  0% {
+    top: 12%;
+  }
+  50% {
+    top: 82%;
+  }
+  100% {
+    top: 12%;
+  }
+}
+
+.camera-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.7rem;
+  flex-shrink: 0;
+}
+
+.camera-hint {
+  margin: 0;
+  color: var(--revive-navy);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  max-width: 34rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .camera-shell,
+  .analysis-shell {
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/*
+  Laptop and above — show full home/revive posters (no crop).
+  Letterbox with sky blue; pin CTA bottom-left over the ice.
+*/
+@media (min-width: 1280px) {
+  .page-home .page-bg-img,
+  .page-revive .page-bg-img {
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .page-camera .page-bg-img,
+  .page-analysis .page-bg-img {
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .page-home .home-footer,
+  .page-revive .revive-footer {
+    position: absolute;
+    left: clamp(3.5rem, 8vw, 7.5rem);
+    bottom: calc(2.15rem + var(--safe-bottom));
+    margin-top: 0;
+    padding: 0;
+    justify-content: flex-start;
+    width: auto;
+    z-index: 2;
+  }
+
+  .page-home .btn-take-selfie,
+  .page-revive .btn-start-over {
+    min-width: 270px;
+    width: auto;
+    padding: 0.92rem 2rem;
+    font-size: clamp(1rem, 1.05vw, 1.1rem);
+  }
+
+  .camera-shell,
+  .analysis-shell {
+    max-width: min(960px, 58vw);
+    margin: 0 auto;
+    width: 100%;
+    padding:
+      calc(1.4rem + var(--safe-top))
+      clamp(1.75rem, 3.5vw, 3.25rem)
+      calc(1.35rem + var(--safe-bottom));
+    gap: 0.75rem;
+  }
+
+  .camera-frame,
+  .analysis-preview {
+    border-radius: 1.4rem;
+    border-width: 4px;
+  }
+
+  .camera-top {
+    max-width: 100%;
+  }
+
+  .camera-title {
+    font-size: 1.15rem;
+  }
+
+  .analysis-bottom {
+    max-width: 440px;
+    padding: 1rem 1.15rem 1.1rem;
+  }
+
+  .concern-circle-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .btn-get-revive {
+    font-size: 1.05rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .page-home .home-footer,
+  .page-revive .revive-footer {
+    left: clamp(5rem, 10vw, 9.5rem);
+    bottom: calc(2.6rem + var(--safe-bottom));
+  }
+
+  .camera-shell,
+  .analysis-shell {
+    max-width: min(1040px, 52vw);
+  }
+}
+
+/* ---------- ANALYSIS ---------- */
+
+.analysis-shell {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding:
+    calc(var(--page-pad) + var(--safe-top))
+    var(--page-pad)
+    calc(1.1rem + var(--safe-bottom));
+  gap: 0.65rem;
+}
+
+.analysis-preview {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  background: rgba(2, 21, 40, 0.55);
+  box-shadow: 0 16px 36px rgba(2, 21, 40, 0.28);
+  border: 3px solid rgba(255, 255, 255, 0.82);
+  animation: cardIn 0.4s ease both;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.analysis-preview img#resultImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  z-index: 1;
+  background: #021528;
+}
+
+.result-mask-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.result-mask-layer[hidden] {
+  display: none !important;
+}
+
+.analysis-preview.is-mirrored #resultImg,
+.analysis-preview.is-mirrored .result-mask-layer {
+  transform: scaleX(-1);
+}
+
+.moisture-legend {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.moisture-legend[hidden] {
+  display: none !important;
+}
+
+.moisture-legend-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(10, 61, 110, 0.82);
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.moisture-legend-scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.moisture-legend-end {
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.moisture-legend-bar {
+  width: 10px;
+  height: 88px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4fc3f7 0%, #81c784 45%, #ef6c00 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.analysis-bottom {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-radius: 1.15rem;
+  padding: 0.8rem 0.85rem 0.9rem;
+  box-shadow: var(--revive-shadow);
+}
+
+.concern-circles {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 160px;
+  margin: 0 auto;
+}
+
+.concern-circles[hidden] {
+  display: none !important;
+}
+
+.concern-circle-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--font);
+  transition: transform 0.18s ease;
+}
+
+.concern-circle-btn:hover {
+  transform: translateY(-2px);
+}
+
+.concern-circle-ring {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--concern-color, var(--revive-blue));
+  background:
+    radial-gradient(circle at 35% 30%, #fff 0%, #e8f7ff 50%, #fff 100%);
+  box-shadow: 0 4px 14px rgba(6, 42, 74, 0.12);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.concern-circle-btn.is-active .concern-circle-ring {
+  border-color: var(--concern-fill, var(--concern-color, var(--revive-blue)));
+  background: var(--concern-fill, var(--concern-color, var(--revive-blue)));
+  box-shadow: 0 6px 18px rgba(6, 42, 74, 0.22);
+  transform: scale(1.06);
+}
+
+.concern-circle-score {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--concern-color, var(--revive-blue));
+  line-height: 1;
+}
+
+.concern-circle-btn.is-active .concern-circle-score {
+  color: #fff;
+}
+
+.concern-circle-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.concern-circle-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-transform: uppercase;
+  color: rgba(6, 42, 74, 0.75);
+}
+
+.concern-circle-btn.is-active .concern-circle-label {
+  color: var(--revive-navy);
+}
+
+.concern-circle-sub {
+  font-size: 10px;
+  font-weight: 650;
+  color: rgba(6, 42, 74, 0.55);
+  margin-top: -2px;
+}
+
+.analysis-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(6, 42, 74, 0.58);
+  text-align: center;
+}
+
+.btn-get-revive {
+  width: 100%;
+}
+
+.analysis-all-set {
+  margin: 0.15rem 0 0.1rem;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font);
+  font-weight: 800;
+  font-style: italic;
+  font-size: clamp(1.15rem, 4.2vw, 1.45rem);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--revive-lime);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.analysis-all-set[hidden] {
+  display: none !important;
+}
+
+.btn-retake {
+  color: rgba(6, 42, 74, 0.7);
+}
+
+/* ---------- REVIVE CTA ---------- */
+
+.revive-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  padding: 0 1.25rem calc(1.25rem + var(--safe-bottom));
+}
+
+.btn-start-over {
+  min-width: min(70vw, 240px);
+  background: linear-gradient(180deg, #39c3f5 0%, var(--revive-blue) 50%, #008fc4 100%);
+}

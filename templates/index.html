@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Revive — Skin Moisture Check</title>
+{% csrf_token %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=20">
+</head>
+<body>
+<div id="revive-root" data-moisture-threshold="{{ MOISTURE_REVIVE_THRESHOLD }}">
+
+  <!-- HOME -->
+  <section id="page1" class="page page-home active" aria-label="Home">
+    <div class="page-bg" aria-hidden="true">
+      <picture>
+        <source media="(min-width: 1280px) and (orientation: landscape)" srcset="{% static 'assets/laptop_view_screen.png' %}?v=2">
+        <source media="(min-width: 768px) and (orientation: landscape)" srcset="{% static 'assets/tablet_view_home_screen2.png' %}?v=2">
+        <source media="(min-width: 768px)" srcset="{% static 'assets/tablet_view_home_screen.png' %}?v=3">
+        <img class="page-bg-img page-bg-img--home" src="{% static 'assets/mobile_view_home_screen.png' %}?v=2" alt="" decoding="async">
+      </picture>
+    </div>
+    <div class="home-footer">
+      <button type="button" id="btnTakeSelfie" class="btn-primary btn-take-selfie">
+        Take a Selfie
+      </button>
+    </div>
+  </section>
+
+  <!-- CAMERA -->
+  <section id="page2" class="page page-camera" aria-label="Camera" hidden>
+    <div class="page-bg" aria-hidden="true">
+      <picture>
+        <source media="(min-width: 1280px) and (orientation: landscape)" srcset="{% static 'assets/laptop_camera_home_page.png' %}?v=2">
+        <source media="(min-width: 768px)" srcset="{% static 'assets/tablet_camera_open_page.png' %}">
+        <img class="page-bg-img" src="{% static 'assets/mobile_camera_open_page.png' %}" alt="" decoding="async">
+      </picture>
+    </div>
+    <div class="camera-shell">
+      <header class="camera-top">
+        <button type="button" id="btnCloseCamera" class="btn-icon" aria-label="Close camera">←</button>
+        <p class="camera-title">Take a selfie</p>
+        <button type="button" id="btnUpload" class="btn-chip" aria-label="Upload photo">Upload</button>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </header>
+
+      <div class="camera-stage camera-stage-kit" id="cameraStage">
+        <div class="camera-frame">
+          <div id="YMK-module" class="ymk-module"></div>
+          <div class="camera-boot-ui" id="cameraBootUi" hidden aria-hidden="true">
+            <div class="camera-boot-spinner"></div>
+            <p>Starting camera…</p>
+          </div>
+          <div class="camera-analyze-ui" id="cameraAnalyzeUi" hidden aria-hidden="true">
+            <div class="camera-analyze-beam"></div>
+            <p>Checking moisture…</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="camera-footer">
+        <p class="camera-hint" id="cameraHint">Hold still when all three checks are Good</p>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ANALYSIS -->
+  <section id="page3" class="page page-analysis" aria-label="Analysis" hidden>
+    <div class="page-bg" aria-hidden="true">
+      <picture>
+        <source media="(min-width: 1280px) and (orientation: landscape)" srcset="{% static 'assets/laptop_camera_home_page.png' %}?v=2">
+        <source media="(min-width: 768px)" srcset="{% static 'assets/tablet_camera_open_page.png' %}">
+        <img class="page-bg-img" src="{% static 'assets/mobile_camera_open_page.png' %}" alt="" decoding="async">
+      </picture>
+    </div>
+    <div class="analysis-shell">
+      <div class="analysis-preview" id="analysisPreview">
+        <img id="resultImg" alt="Your selfie">
+        <img id="resultMaskLayer" class="result-mask-layer" alt="Moisture mask" hidden>
+        <div class="moisture-legend" id="moistureLegend" hidden aria-hidden="true">
+          <span class="moisture-legend-badge">Moisture</span>
+          <div class="moisture-legend-scale">
+            <span class="moisture-legend-end">Hydrated</span>
+            <div class="moisture-legend-bar" aria-hidden="true"></div>
+            <span class="moisture-legend-end">Dry</span>
+          </div>
+        </div>
+      </div>
+      <div class="analysis-bottom">
+        <div class="concern-circles" id="concernCircles" aria-label="Moisture scores"></div>
+        <p class="analysis-hint" id="analysisHint">Tap Moisture to view the hydration mask</p>
+        <p class="analysis-all-set" id="analysisAllSet" hidden>You're all set</p>
+        <button type="button" id="btnGetRevive" class="btn-primary btn-get-revive">
+          Get a Revive
+        </button>
+        <button type="button" id="btnRetake" class="btn-text btn-retake">Retake selfie</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIVE CTA -->
+  <section id="page4" class="page page-revive" aria-label="Get Revive" hidden>
+    <div class="page-bg" aria-hidden="true">
+      <picture>
+        <source media="(min-width: 1280px) and (orientation: landscape)" srcset="{% static 'assets/laptop_revive_page.png' %}?v=2">
+        <source media="(min-width: 768px) and (orientation: landscape)" srcset="{% static 'assets/tablet_revive_page2.png' %}?v=2">
+        <source media="(min-width: 768px)" srcset="{% static 'assets/tablet_revive_page.png' %}?v=2">
+        <img class="page-bg-img page-bg-img--revive" src="{% static 'assets/mobile_revive_page.png' %}?v=2" alt="" decoding="async">
+      </picture>
+    </div>
+    <div class="revive-footer">
+      <button type="button" id="btnStartOver" class="btn-primary btn-start-over">
+        Done
+      </button>
+    </div>
+  </section>
+
+</div>
+<script>
+  window.REVIVE_MOISTURE_THRESHOLD = {{ MOISTURE_REVIVE_THRESHOLD }};
+  window.REVIVE_CONFIG = {
+    makeuparApiKey: "{{ MAKEUPAR_API_KEY|escapejs }}"
+  };
+  window.ymkAsyncInit = function () {
+    window.__YMK_READY__ = true;
+    if (typeof window.onYmkSdkReady === 'function') {
+      window.onYmkSdkReady();
+    }
+  };
+</script>
+{% if MAKEUPAR_API_KEY %}
+<script src="https://plugins-media.makeupar.com/v2.5-camera-kit/sdk.js?apiKey={{ MAKEUPAR_API_KEY|urlencode }}"></script>
+{% endif %}
+<script src="{% static 'js/camera-kit.js' %}?v=9"></script>
+<script src="{% static 'js/index.js' %}?v=11"></script>
+</body>
+</html>
